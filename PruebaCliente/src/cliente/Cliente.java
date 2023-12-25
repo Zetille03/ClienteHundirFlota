@@ -25,13 +25,17 @@ public class Cliente {
     private JTextField mensajeField;
     private ObjectOutputStream outputStream;
 
+    private int idUsuario;
     private String nombreUsuario;
+    private String passwordUsuario;
+//    private String infoLogeo;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Cliente().iniciarRegistro());
     }
 
     private void iniciarRegistro() {
+    	conectarAlServidor();
         registroFrame = new JFrame("Registro de Usuario");
         registroFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         registroFrame.setSize(300, 150);
@@ -66,9 +70,16 @@ public class Cliente {
         String usuario = usuarioField.getText();
         char[] contrasena = contrasenaField.getPassword();
 
+        
         if (!usuario.isEmpty() && contrasena.length > 0) {
+        	
             nombreUsuario = usuario;
+            passwordUsuario = new String(contrasena);
 
+            String mensaje = ("L@"+nombreUsuario+"@"+passwordUsuario);
+            
+            enviarMensajeLogeo(mensaje);
+            
             SwingUtilities.invokeLater(() -> {
                 registroFrame.setVisible(false);
                 iniciarInterfaz();
@@ -90,7 +101,7 @@ public class Cliente {
         mensajeField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enviarMensaje();
+            	enviarMensajeTextInput();
             }
         });
 
@@ -98,7 +109,7 @@ public class Cliente {
         enviarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enviarMensaje();
+            	enviarMensajeTextInput();
             }
         });
 
@@ -114,7 +125,7 @@ public class Cliente {
         chatFrame.add(panel);
         chatFrame.setVisible(true);
 
-        conectarAlServidor();
+//        conectarAlServidor();
     }
 
     private void conectarAlServidor() {
@@ -127,8 +138,21 @@ public class Cliente {
                 try {
                     ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                     String mensaje;
+                    String[] mensajeArray;
+                    
+                    mensaje = (String) inputStream.readObject();
+                    mensajeArray = mensaje.split("@");
+                    if(mensajeArray[1].equals("0")) {
+                        throw new Exception("uwu");
+                    }else {
+                    	System.out.println(mensajeArray[2]);
+                    	idUsuario = Integer.parseInt(mensajeArray[2]);
+                    }
+                    
+                    
                     do {
                         mensaje = (String) inputStream.readObject();
+                        System.out.println(mensaje);
                         mostrarMensaje(mensaje);
                     } while (!mensaje.equals("bye"));
 
@@ -142,7 +166,13 @@ public class Cliente {
                     }else {
                         e.printStackTrace();
                     }
-                }
+                } catch (Exception e) {
+					if(e.getMessage().equals("uwu")) {
+						chatFrame.setVisible(false);
+			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Datos erroneos.");
+			            System.exit(0);
+					}
+				}
             }).start();
         } catch (ConnectException e) {
         	chatFrame.setVisible(false);
@@ -153,12 +183,29 @@ public class Cliente {
         }
     }
 
-    private void enviarMensaje() {
-        try {
+    private void enviarMensajeTextInput() {
+    	try {
             String mensaje = mensajeField.getText();
             if (!mensaje.isEmpty()) {
         		outputStream.writeObject(mensaje);
                 mensajeField.setText("");
+            }
+        } catch (IOException e) {
+            // Manejar la excepción de conexión reset
+            if (e instanceof SocketException && e.getMessage().equals("Connection reset")) {
+                System.out.println("Conexión con el servidor perdida.");
+                System.exit(0);
+            }else {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private void enviarMensajeLogeo(String message) {
+        try {
+            String mensaje = message;
+            if (!mensaje.isEmpty()) {
+        		outputStream.writeObject(mensaje);
             }
         } catch (IOException e) {
             // Manejar la excepción de conexión reset
