@@ -28,6 +28,7 @@ public class Cliente {
     private int idUsuario;
     private String nombreUsuario;
     private String passwordUsuario;
+    private boolean usuarioDuplicado=false;
 //    private String infoLogeo;
 
     public static void main(String[] args) {
@@ -143,7 +144,10 @@ public class Cliente {
                     mensaje = (String) inputStream.readObject();
                     mensajeArray = mensaje.split("@");
                     if(mensajeArray[1].equals("0")) {
-                        throw new Exception("uwu");
+                        throw new Exception("datos de registro incorrecto");
+                    }else if(mensajeArray[1].equals("R")) {
+                    	usuarioDuplicado = true;
+                    	throw new Exception("usuario ya registrado");
                     }else {
                     	System.out.println(mensajeArray[2]);
                     	idUsuario = Integer.parseInt(mensajeArray[2]);
@@ -167,9 +171,13 @@ public class Cliente {
                         e.printStackTrace();
                     }
                 } catch (Exception e) {
-					if(e.getMessage().equals("uwu")) {
+					if(e.getMessage().equals("datos de registro incorrecto")) {
 						chatFrame.setVisible(false);
 			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Datos erroneos.");
+			            System.exit(0);
+					}else if(e.getMessage().equals("usuario ya registrado")) {
+						chatFrame.setVisible(false);
+			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Usuario ya registrado.");
 			            System.exit(0);
 					}
 				}
