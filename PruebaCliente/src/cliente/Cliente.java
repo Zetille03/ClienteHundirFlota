@@ -10,19 +10,20 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 
 public class Cliente {
 
     private static final String SERVIDOR_IP = "localhost";
     private static final int PUERTO = 12345;
-
+    Socket socket;
+    
     private JFrame registroFrame;
     private JTextField usuarioField;
     private JPasswordField contrasenaField;
 
-    private JFrame chatFrame;
-    private JTextArea chatArea;
-    private JTextField mensajeField;
+    private FramePartida partidaFrame;
+    private MenuFrame menuFrame;
     private ObjectOutputStream outputStream;
 
     private int idUsuario;
@@ -63,7 +64,7 @@ public class Cliente {
         panel.add(new JLabel());  // Espacio en blanco
         panel.add(registrarButton);
 
-        registroFrame.add(panel);
+        registroFrame.getContentPane().add(panel);
         registroFrame.setVisible(true);
     }
 
@@ -83,58 +84,59 @@ public class Cliente {
             
             SwingUtilities.invokeLater(() -> {
                 registroFrame.setVisible(false);
-                iniciarInterfaz();
+                iniciarMenu();
             });
         } else {
             JOptionPane.showMessageDialog(registroFrame, "Por favor, complete todos los campos.");
         }
     }
 
-    private void iniciarInterfaz() {
-        chatFrame = new JFrame("Chat Cliente - " + nombreUsuario);
-        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        chatFrame.setSize(400, 300);
+    private void iniciarMenu() {
+//        chatFrame = new JFrame("Chat Cliente - " + nombreUsuario);
+//        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        chatFrame.setSize(400, 300);
+//
+//        chatArea = new JTextArea();
+//        chatArea.setEditable(false);
+//
+//        mensajeField = new JTextField();
+//        mensajeField.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//            	enviarMensajeTextInput();
+//            }
+//        });
+//
+//        JButton enviarButton = new JButton("Enviar");
+//        enviarButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//            	enviarMensajeTextInput();
+//            }
+//        });
+//
+//        JPanel panel = new JPanel(new BorderLayout());
+//        panel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
+//
+//        JPanel inputPanel = new JPanel(new BorderLayout());
+//        inputPanel.add(mensajeField, BorderLayout.CENTER);
+//        inputPanel.add(enviarButton, BorderLayout.EAST);
+//
+//        panel.add(inputPanel, BorderLayout.SOUTH);
+//
+//        chatFrame.getContentPane().add(panel);
+//        chatFrame.setVisible(true);
 
-        chatArea = new JTextArea();
-        chatArea.setEditable(false);
-
-        mensajeField = new JTextField();
-        mensajeField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	enviarMensajeTextInput();
-            }
-        });
-
-        JButton enviarButton = new JButton("Enviar");
-        enviarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            	enviarMensajeTextInput();
-            }
-        });
-
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
-
-        JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.add(mensajeField, BorderLayout.CENTER);
-        inputPanel.add(enviarButton, BorderLayout.EAST);
-
-        panel.add(inputPanel, BorderLayout.SOUTH);
-
-        chatFrame.add(panel);
-        chatFrame.setVisible(true);
-
-//        conectarAlServidor();
+    	
+    	menuFrame = new MenuFrame(outputStream);
+    	menuFrame.setVisible(true);
     }
 
     private void conectarAlServidor() {
         try {
-            Socket socket = new Socket(SERVIDOR_IP, PUERTO);
+            socket = new Socket(SERVIDOR_IP, PUERTO);
             outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-            // Hilo para recibir mensajes del servidor
             new Thread(() -> {
                 try {
                     ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
@@ -155,9 +157,36 @@ public class Cliente {
                     
                     
                     do {
+                    	mensaje = null;
+                    	mensajeArray = null;
                         mensaje = (String) inputStream.readObject();
-                        System.out.println(mensaje);
-                        mostrarMensaje(mensaje);
+                        mensajeArray = mensaje.split("@");
+                        switch(mensajeArray[0]) {
+                        case "D":
+                        	System.out.println(mensaje);
+                        	break;
+                        case "P":
+                        	switch(mensajeArray[1]) {
+                        	case "H":
+                        		if(mensajeArray[2].equals("{}")==false) {
+                        			System.out.println(mensajeArray[2]);
+                        			HashMap<Integer,String> hashmapEsperando = stringToHashMap(mensajeArray[2]);
+                        			menuFrame.seleccionarFrame.setVisible(true);
+                        			menuFrame.seleccionarFrame.cargarDatos(hashmapEsperando);
+                        		}else {
+                        			System.out.println(mensajeArray[2]);
+                        			menuFrame.seleccionarFrame.setVisible(true);
+                        			menuFrame.seleccionarFrame.esperarConexion();
+                        		}
+                        	case "E":
+                        		
+                        	}
+                        	break;
+                        default:
+//                        	 System.out.println(mensaje);
+                        	 break;
+                        }
+                       
                     } while (!mensaje.equals("bye"));
 
                     socket.close();
@@ -172,40 +201,22 @@ public class Cliente {
                     }
                 } catch (Exception e) {
 					if(e.getMessage().equals("datos de registro incorrecto")) {
-						chatFrame.setVisible(false);
+						partidaFrame.setVisible(false);
 			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Datos erroneos.");
 			            System.exit(0);
 					}else if(e.getMessage().equals("usuario ya registrado")) {
-						chatFrame.setVisible(false);
+						partidaFrame.setVisible(false);
 			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Usuario ya registrado.");
 			            System.exit(0);
 					}
 				}
             }).start();
         } catch (ConnectException e) {
-        	chatFrame.setVisible(false);
+        	partidaFrame.setVisible(false);
             JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Verifica la conexión.");
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void enviarMensajeTextInput() {
-    	try {
-            String mensaje = mensajeField.getText();
-            if (!mensaje.isEmpty()) {
-        		outputStream.writeObject(mensaje);
-                mensajeField.setText("");
-            }
-        } catch (IOException e) {
-            // Manejar la excepción de conexión reset
-            if (e instanceof SocketException && e.getMessage().equals("Connection reset")) {
-                System.out.println("Conexión con el servidor perdida.");
-                System.exit(0);
-            }else {
-                e.printStackTrace();
-            }
         }
     }
     
@@ -225,10 +236,15 @@ public class Cliente {
             }
         }
     }
-
-    private void mostrarMensaje(String mensaje) {
-        SwingUtilities.invokeLater(() -> {
-            chatArea.append(mensaje + "\n");
-        });
+    
+    private static HashMap<Integer, String> stringToHashMap(String str) {
+        HashMap<Integer, String> hashMap = new HashMap<>();
+        // Eliminar los corchetes y espacios en blanco del String
+        String[] pairs = str.substring(1, str.length() - 1).split(", ");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            hashMap.put(Integer.parseInt(keyValue[0]), keyValue[1]);
+        }
+        return hashMap;
     }
 }
