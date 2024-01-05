@@ -62,11 +62,9 @@ public class SeleccionContrincanteFrame extends JFrame {
 	}
 
 	public void cargarDatos(HashMap<Integer,String> jugadoresEsperando) {
-		System.out.println("che q pasa");
 		for(Map.Entry<Integer,String> entry: jugadoresEsperando.entrySet()) {
 			String usuario = entry.getValue();
 			int idUsuario = entry.getKey();
-			System.out.println(usuario+""+idUsuario);
 			SwingUtilities.invokeLater(() -> {
 				chatArea.append(""+idUsuario+".-"+usuario+" "+"\n");
 			});

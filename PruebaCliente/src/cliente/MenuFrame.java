@@ -23,8 +23,7 @@ public class MenuFrame extends JFrame {
     MenuFrame menu = this;
      
    public MenuFrame(ObjectOutputStream salida) {
-	   seleccionarFrame = new SeleccionContrincanteFrame(salida);
-	   nuevaPartidaFrame = new FramePartida(this, salida);
+//	   nuevaPartidaFrame = new FramePartida(this, salida);
 	   arrayFrames.add(nuevaPartidaFrame);
 	   arrayFrames.add(this);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

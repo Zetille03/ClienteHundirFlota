@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -15,6 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+
+import infocompartida.Barco;
+import infocompartida.Boton;
 
 public class Tablero extends JPanel {
 	Boton[] boton = new Boton[105];
@@ -24,15 +28,17 @@ public class Tablero extends JPanel {
 	JPanel titulo = new JPanel();
 	ObjectOutputStream salida;
 	boolean jugador;
-	boolean disponibilidadDisparo=true;
-	
+	ArrayList<Barco> arrayBarcos;
 	JButton rotar;
-
+	FramePartida partida;
 	JLabel titulo_visible;
+	Tablero yo = this;
 
-	Tablero(boolean jugador, String tituloTablero, ObjectOutputStream salida) {
+	Tablero(boolean jugador, String tituloTablero, ObjectOutputStream salida, ArrayList<Barco> posicionBarcos, FramePartida partida) {
 		this.jugador = jugador;
 		this.salida = salida;
+		this.arrayBarcos = posicionBarcos;
+		this.partida = partida;
 		BoxLayout layoutTablero = new BoxLayout(this,BoxLayout.Y_AXIS);
 		setLayout(layoutTablero);
 		
@@ -42,9 +48,12 @@ public class Tablero extends JPanel {
 		setBorder(new EmptyBorder(15, 5, 0, 25));
 
 		crearTablero(tituloTablero);
+		
+		rellenarPosicionesBarco(this.arrayBarcos);
 	}
 
 	public void crearTablero(String tituloTablero) {
+		
 		titulo.add(new JLabel(tituloTablero));
 		add(titulo);
 		// -----CREAR LAS LETRAS
@@ -100,24 +109,50 @@ public class Tablero extends JPanel {
 				contador++;
 			}
 
-			boton[x] = new Boton("",x);
+			boton[x] = new Boton("");
+			boton[x].setPosicionBarco(x);
+			boton[x].setAgua(true);
+			if(this.jugador) {
+				this.boton[x].setColorAgua();
+			}
 			if(this.jugador==false) {
 				Boton b = boton[x];
-				boton[x].addActionListener(new ActionListener() {
+				if(this.jugador==false) {
+					boton[x].addActionListener(new ActionListener() {
 
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						try {
-							if(disponibilidadDisparo==true) {
-								salida.writeObject(String.valueOf(b.id));
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							try {
+								if(partida.esMiTurno==true) {
+									if(b.getAgua()) {
+										b.setFallido(true);
+										b.setColorFallido();
+									}else {
+										b.setTocado(true);
+										b.setColorTocado();
+										Barco barco = FramePartida.seleccionarBarco(b,arrayBarcos);
+										boolean hundido = FramePartida.comprobacionBarcoHundido(barco);
+										if(hundido==true) {
+											FramePartida.hundirBarco(barco,yo);
+										}
+									}
+									partida.esMiTurno=false;
+									salida.writeObject("D@D@"+partida.id_partida+"@"+b.getPosicionTablero()+"@"+partida.nombreContrincante);
+									if(ganador(arrayBarcos)==true) {
+										salida.writeObject("D@W@"+partida.nombreContrincante+"@"+partida.id_partida);
+									}
+								}else {
+									
+								}
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
 							}
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
 						}
-					}
-					
-				});
+						
+					});
+				}
+				
 			}
 			
 			boton[x].setSize(25, 25);
@@ -129,13 +164,36 @@ public class Tablero extends JPanel {
 		botones.add(panelrotar);
 		panelrotar.setLayout(new FlowLayout());
 		rotar = new JButton("Rotar");
-		if(this.jugador==false) {
-			rotar.setEnabled(false);
-		}
+		rotar.setEnabled(false);
 		rotar.setBackground(Color.cyan);
 
 		panelrotar.add(rotar);
 		
 		add(botones);
+	}
+	
+	public void rellenarPosicionesBarco(ArrayList<Barco> arrayBarcos) {
+		if(arrayBarcos==null) {
+			System.out.println("esta vacio");
+		}else {
+			for(Barco barco: arrayBarcos) {
+				for(Boton b : barco.getBotonesBarco()) {
+					this.boton[b.getPosicionTablero()].setAgua(false);
+					if(this.jugador) {
+						this.boton[b.getPosicionTablero()].setColorEleccionVerde();
+					}
+				}
+			}
+		}
+		
+	}
+	
+	public boolean ganador(ArrayList<Barco> arrayBarcos) {
+		for(Barco barco: arrayBarcos) {
+			if(barco.isHundido()==false) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

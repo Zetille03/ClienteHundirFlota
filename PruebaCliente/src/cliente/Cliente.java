@@ -1,6 +1,10 @@
 package cliente;
 
 import javax.swing.*;
+
+import infocompartida.Barco;
+import infocompartida.Boton;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Cliente {
@@ -91,43 +96,7 @@ public class Cliente {
         }
     }
 
-    private void iniciarMenu() {
-//        chatFrame = new JFrame("Chat Cliente - " + nombreUsuario);
-//        chatFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        chatFrame.setSize(400, 300);
-//
-//        chatArea = new JTextArea();
-//        chatArea.setEditable(false);
-//
-//        mensajeField = new JTextField();
-//        mensajeField.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//            	enviarMensajeTextInput();
-//            }
-//        });
-//
-//        JButton enviarButton = new JButton("Enviar");
-//        enviarButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//            	enviarMensajeTextInput();
-//            }
-//        });
-//
-//        JPanel panel = new JPanel(new BorderLayout());
-//        panel.add(new JScrollPane(chatArea), BorderLayout.CENTER);
-//
-//        JPanel inputPanel = new JPanel(new BorderLayout());
-//        inputPanel.add(mensajeField, BorderLayout.CENTER);
-//        inputPanel.add(enviarButton, BorderLayout.EAST);
-//
-//        panel.add(inputPanel, BorderLayout.SOUTH);
-//
-//        chatFrame.getContentPane().add(panel);
-//        chatFrame.setVisible(true);
-
-    	
+    private void iniciarMenu() {    	
     	menuFrame = new MenuFrame(outputStream);
     	menuFrame.setVisible(true);
     }
@@ -163,24 +132,44 @@ public class Cliente {
                         mensajeArray = mensaje.split("@");
                         switch(mensajeArray[0]) {
                         case "D":
-                        	System.out.println(mensaje);
+                        	switch(mensajeArray[1]) {
+                        	case "R":
+                        		menuFrame.nuevaPartidaFrame.recibirDisparo(Integer.parseInt(mensajeArray[2]),menuFrame.nuevaPartidaFrame.barcosJugador);
+                        		break;
+                        	case "P":
+                        		System.out.println("perdi: "+this.nombreUsuario);
+                        	}
                         	break;
                         case "P":
+                        	
                         	switch(mensajeArray[1]) {
                         	case "H":
                         		if(mensajeArray[2].equals("{}")==false) {
-                        			System.out.println(mensajeArray[2]);
                         			HashMap<Integer,String> hashmapEsperando = stringToHashMap(mensajeArray[2]);
+                        			menuFrame.seleccionarFrame = new SeleccionContrincanteFrame(outputStream);
                         			menuFrame.seleccionarFrame.setVisible(true);
                         			menuFrame.seleccionarFrame.cargarDatos(hashmapEsperando);
                         		}else {
-                        			System.out.println(mensajeArray[2]);
+                        			menuFrame.seleccionarFrame = new SeleccionContrincanteFrame(outputStream);
                         			menuFrame.seleccionarFrame.setVisible(true);
                         			menuFrame.seleccionarFrame.esperarConexion();
                         		}
+                        		break;
                         	case "E":
-                        		
+                        		String nombreContrincante = mensajeArray[2];
+                        		menuFrame.seleccionarFrame.setVisible(false);
+                        		menuFrame.seleccionarFrame = null;
+                        		boolean eleccion = Boolean.parseBoolean(mensajeArray[4]);;
+                        		menuFrame.nuevaPartidaFrame = new FramePartida(menuFrame, outputStream, Integer.parseInt(mensajeArray[3]),nombreContrincante,eleccion);
+                        		new ColocacionBarcosFrame(nombreUsuario,outputStream,nombreContrincante,menuFrame).setVisible(true);
+                        		break;
+                        	case "T":
+                        		ArrayList<Barco> arrayBarcosEnemigo = (ArrayList<Barco>) inputStream.readObject();
+                        		menuFrame.nuevaPartidaFrame.barcosEnemigo = arrayBarcosEnemigo;
+                        		menuFrame.nuevaPartidaFrame.iniciarInterfaz(nombreUsuario);
+                        		break;
                         	}
+                        	
                         	break;
                         default:
 //                        	 System.out.println(mensaje);
@@ -201,18 +190,16 @@ public class Cliente {
                     }
                 } catch (Exception e) {
 					if(e.getMessage().equals("datos de registro incorrecto")) {
-						partidaFrame.setVisible(false);
 			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Datos erroneos.");
 			            System.exit(0);
 					}else if(e.getMessage().equals("usuario ya registrado")) {
-						partidaFrame.setVisible(false);
 			            JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Usuario ya registrado.");
 			            System.exit(0);
 					}
 				}
             }).start();
         } catch (ConnectException e) {
-        	partidaFrame.setVisible(false);
+        	menuFrame.setVisible(false);
             JOptionPane.showMessageDialog(registroFrame, "No se pudo conectar al servidor. Verifica la conexión.");
             System.exit(0);
         } catch (IOException e) {
@@ -236,6 +223,15 @@ public class Cliente {
             }
         }
     }
+    public static void mostrarArray(ArrayList<Barco> arrayBarcos) {
+		for(Barco barco: arrayBarcos) {
+			System.out.print("Barco: ");
+			for(Boton b : barco.getBotonesBarco()) {
+				System.out.print(b.getPosicionTablero()+",");
+			}
+			System.out.println("");
+		}
+	}
     
     private static HashMap<Integer, String> stringToHashMap(String str) {
         HashMap<Integer, String> hashMap = new HashMap<>();
