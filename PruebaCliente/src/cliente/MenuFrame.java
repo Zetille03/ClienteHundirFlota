@@ -17,6 +17,7 @@ public class MenuFrame extends JFrame {
     JButton verPartidasTerminadasBoton = new JButton("Ver partidas terminadas");
     JButton verPartidasNoTerminadasBoton = new JButton("Ver partidas sin terminar");
     JButton salirBoton = new JButton("Salir");
+    JButton volverAPartidaBoton = new JButton("Volver a la partida");
     FramePartida nuevaPartidaFrame;
     SeleccionContrincanteFrame seleccionarFrame;
     ArrayList<JFrame> arrayFrames = new ArrayList<JFrame>();
@@ -28,8 +29,8 @@ public class MenuFrame extends JFrame {
 	   arrayFrames.add(this);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-       setLayout(new GridLayout(4,1));
-       setSize(new Dimension(200,300));
+       setLayout(new GridLayout(5,1));
+       setSize(new Dimension(200,400));
        
       
        nuevaPartidaBoton.addActionListener(new ActionListener() {
@@ -55,7 +56,21 @@ public class MenuFrame extends JFrame {
     	   
        });
        
+       volverAPartidaBoton.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(nuevaPartidaFrame!=null) {
+				if(nuevaPartidaFrame.isVisible()==false) {
+					nuevaPartidaFrame.setVisible(true);
+
+				}
+			}
+		}
+	});
+       
        add(nuevaPartidaBoton);
+       add(volverAPartidaBoton);
        add(verPartidasTerminadasBoton);
        add(verPartidasNoTerminadasBoton);
        add(salirBoton);

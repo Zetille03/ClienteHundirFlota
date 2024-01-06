@@ -27,6 +27,9 @@ public class FramePartida extends JFrame{
 	public boolean esMiTurno;
 	String nombreUsuario;
 	String nombreContrincante;
+	JButton volverMenuBoton;
+	JButton renunciarPartida;
+	JButton salirAplicacionBoton;
 	
 	FramePartida(MenuFrame menuFrame, ObjectOutputStream salida, int id_partida, String contrincante, boolean primeroEnEmpezar){
 		this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
@@ -38,6 +41,7 @@ public class FramePartida extends JFrame{
 	}
 	
 	public void iniciarInterfaz(String nombreUsuario) throws InterruptedException {
+		menuFrame.setVisible(false);
 		this.nombreUsuario = nombreUsuario;
 		setTitle("Partida " + nombreUsuario+";        ID_PARTIDA: "+this.id_partida);
 		JPanel tablerosPanel = new JPanel();
@@ -46,10 +50,9 @@ public class FramePartida extends JFrame{
 		GridLayout layout = new GridLayout(1,2);
 		tablerosPanel.setLayout(layout);
 		
-		JButton volverMenuBoton = new JButton("Volver al menu");
-		JButton guardarPartida = new JButton("Guardar");
-		JButton renunciarPartida = new JButton("Renunciar");
-		JButton salirAplicacionBoton = new JButton("Salir");
+		volverMenuBoton = new JButton("Volver al menu");
+		renunciarPartida = new JButton("Renunciar");
+		salirAplicacionBoton = new JButton("Salir");
 		
 		volverMenuBoton.addActionListener(new ActionListener() {
 			MenuFrame menu= menuFrame;
@@ -69,7 +72,6 @@ public class FramePartida extends JFrame{
 			}
 		});
 		botonesPanel.add(volverMenuBoton);
-		botonesPanel.add(guardarPartida);
 		botonesPanel.add(renunciarPartida);
 		botonesPanel.add(salirAplicacionBoton);
 		

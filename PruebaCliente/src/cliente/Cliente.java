@@ -137,6 +137,7 @@ public class Cliente {
                         		menuFrame.nuevaPartidaFrame.recibirDisparo(Integer.parseInt(mensajeArray[2]),menuFrame.nuevaPartidaFrame.barcosJugador);
                         		break;
                         	case "P":
+                        		menuFrame.nuevaPartidaFrame.renunciarPartida.setEnabled(false);
                         		System.out.println("perdi: "+this.nombreUsuario);
                         	}
                         	break;
@@ -147,10 +148,12 @@ public class Cliente {
                         		if(mensajeArray[2].equals("{}")==false) {
                         			HashMap<Integer,String> hashmapEsperando = stringToHashMap(mensajeArray[2]);
                         			menuFrame.seleccionarFrame = new SeleccionContrincanteFrame(outputStream);
+                        			menuFrame.setVisible(false);
                         			menuFrame.seleccionarFrame.setVisible(true);
                         			menuFrame.seleccionarFrame.cargarDatos(hashmapEsperando);
                         		}else {
                         			menuFrame.seleccionarFrame = new SeleccionContrincanteFrame(outputStream);
+                        			menuFrame.setVisible(false);
                         			menuFrame.seleccionarFrame.setVisible(true);
                         			menuFrame.seleccionarFrame.esperarConexion();
                         		}
@@ -161,7 +164,7 @@ public class Cliente {
                         		menuFrame.seleccionarFrame = null;
                         		boolean eleccion = Boolean.parseBoolean(mensajeArray[4]);;
                         		menuFrame.nuevaPartidaFrame = new FramePartida(menuFrame, outputStream, Integer.parseInt(mensajeArray[3]),nombreContrincante,eleccion);
-                        		new ColocacionBarcosFrame(nombreUsuario,outputStream,nombreContrincante,menuFrame).setVisible(true);
+                        		new ColocacionBarcosFrame(nombreUsuario,outputStream,nombreContrincante,menuFrame,Integer.parseInt(mensajeArray[3])).setVisible(true);
                         		break;
                         	case "T":
                         		ArrayList<Barco> arrayBarcosEnemigo = (ArrayList<Barco>) inputStream.readObject();

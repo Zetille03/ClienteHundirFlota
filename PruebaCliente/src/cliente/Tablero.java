@@ -140,6 +140,7 @@ public class Tablero extends JPanel {
 									salida.writeObject("D@D@"+partida.id_partida+"@"+b.getPosicionTablero()+"@"+partida.nombreContrincante);
 									if(ganador(arrayBarcos)==true) {
 										salida.writeObject("D@W@"+partida.nombreContrincante+"@"+partida.id_partida);
+										partida.renunciarPartida.setEnabled(false);
 									}
 								}else {
 									
