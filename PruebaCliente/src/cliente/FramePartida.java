@@ -3,15 +3,15 @@ package cliente;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
 import javax.swing.*;
 
-import infocompartida.Barco;
-import infocompartida.Boton;
-
+import info.Barco;
+import info.Boton;
 
 
 public class FramePartida extends JFrame{
@@ -71,9 +71,25 @@ public class FramePartida extends JFrame{
 				System.exit(0);
 			}
 		});
+		
+		renunciarPartida.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					salida.writeObject("D@RE@"+nombreContrincante+"@"+id_partida);
+					partidaFrame.tableroEnemigo.terminada = true;
+					partidaFrame.tableroJugador.terminada = true;
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		botonesPanel.add(volverMenuBoton);
 		botonesPanel.add(renunciarPartida);
 		botonesPanel.add(salirAplicacionBoton);
+		botonesPanel.add(mensajeAyuda);
 		
 		while(barcosJugador==null || barcosEnemigo==null) {
 			Thread.sleep(1);
@@ -93,7 +109,6 @@ public class FramePartida extends JFrame{
 		add(tablerosPanel);
 		setLocationRelativeTo(null);
 		setVisible(true);
-		System.out.println("todo añadido");
 	}
 	public static void mostrarArray(ArrayList<Barco> arrayBarcos) {
 		for(Barco barco: arrayBarcos) {
@@ -150,5 +165,10 @@ public class FramePartida extends JFrame{
 			tablero.boton[b.getPosicionTablero()].setColorHundido();
 			tablero.boton[b.getPosicionTablero()].setHundido(true);
 		}
+	}
+	
+	public void mostrarAyuda(String texto) {
+		this.mensajeAyuda.setText(texto);
+		this.mensajeAyuda.setForeground(Color.red);
 	}
 }

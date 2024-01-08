@@ -21,7 +21,7 @@ public class SeleccionContrincanteFrame extends JFrame {
 	JTextField mensajeField;
 	
 	SeleccionContrincanteFrame(ObjectOutputStream salida){
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 300);
         chatArea = new JTextArea();
         

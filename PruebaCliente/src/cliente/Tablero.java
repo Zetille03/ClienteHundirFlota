@@ -12,13 +12,15 @@ import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import infocompartida.Barco;
-import infocompartida.Boton;
+import info.Barco;
+import info.Boton;
+
 
 public class Tablero extends JPanel {
 	Boton[] boton = new Boton[105];
@@ -33,6 +35,7 @@ public class Tablero extends JPanel {
 	FramePartida partida;
 	JLabel titulo_visible;
 	Tablero yo = this;
+	public boolean terminada = false;
 
 	Tablero(boolean jugador, String tituloTablero, ObjectOutputStream salida, ArrayList<Barco> posicionBarcos, FramePartida partida) {
 		this.jugador = jugador;
@@ -110,7 +113,7 @@ public class Tablero extends JPanel {
 			}
 
 			boton[x] = new Boton("");
-			boton[x].setPosicionBarco(x);
+			boton[x].setPosicionTablero(x);
 			boton[x].setAgua(true);
 			if(this.jugador) {
 				this.boton[x].setColorAgua();
@@ -123,7 +126,7 @@ public class Tablero extends JPanel {
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							try {
-								if(partida.esMiTurno==true) {
+								if(partida.esMiTurno==true && terminada == false) {
 									if(b.getAgua()) {
 										b.setFallido(true);
 										b.setColorFallido();
@@ -140,6 +143,7 @@ public class Tablero extends JPanel {
 									salida.writeObject("D@D@"+partida.id_partida+"@"+b.getPosicionTablero()+"@"+partida.nombreContrincante);
 									if(ganador(arrayBarcos)==true) {
 										salida.writeObject("D@W@"+partida.nombreContrincante+"@"+partida.id_partida);
+										partida.mostrarAyuda("Ganaste");
 										partida.renunciarPartida.setEnabled(false);
 									}
 								}else {
@@ -197,4 +201,5 @@ public class Tablero extends JPanel {
 		}
 		return true;
 	}
+	
 }

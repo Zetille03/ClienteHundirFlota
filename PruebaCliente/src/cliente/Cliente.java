@@ -2,8 +2,8 @@ package cliente;
 
 import javax.swing.*;
 
-import infocompartida.Barco;
-import infocompartida.Boton;
+import info.Barco;
+import info.Boton;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,6 +17,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 public class Cliente {
 
     private static final String SERVIDOR_IP = "localhost";
@@ -27,7 +28,7 @@ public class Cliente {
     private JTextField usuarioField;
     private JPasswordField contrasenaField;
 
-    private FramePartida partidaFrame;
+//    private FramePartida partidaFrame;
     private MenuFrame menuFrame;
     private ObjectOutputStream outputStream;
 
@@ -133,12 +134,16 @@ public class Cliente {
                         switch(mensajeArray[0]) {
                         case "D":
                         	switch(mensajeArray[1]) {
+                        	case "RE":
+                        		menuFrame.nuevaPartidaFrame.mostrarAyuda("Se rindio tu contrincario");
+                        		menuFrame.nuevaPartidaFrame.tableroEnemigo.terminada = true;
+                        		menuFrame.nuevaPartidaFrame.tableroJugador.terminada = true;
+                        		break;
                         	case "R":
                         		menuFrame.nuevaPartidaFrame.recibirDisparo(Integer.parseInt(mensajeArray[2]),menuFrame.nuevaPartidaFrame.barcosJugador);
                         		break;
                         	case "P":
-                        		menuFrame.nuevaPartidaFrame.renunciarPartida.setEnabled(false);
-                        		System.out.println("perdi: "+this.nombreUsuario);
+                        		menuFrame.nuevaPartidaFrame.mostrarAyuda("perdiste");
                         	}
                         	break;
                         case "P":
@@ -172,17 +177,38 @@ public class Cliente {
                         		menuFrame.nuevaPartidaFrame.iniciarInterfaz(nombreUsuario);
                         		break;
                         	}
+                        	break;
+                        case "R":
+                        	switch(mensajeArray[1]) {
+                        	case "L":
+                        		menuFrame.replayFrame = new ReplayFrame(outputStream,menuFrame);
+                        		menuFrame.setVisible(false);
+                    			menuFrame.replayFrame.setVisible(true);
+                        		menuFrame.replayFrame.cargarDatos(mensajeArray[2]);
+                        		break;
+                        	case "P":
+                        		
+                        		
+                        		ArrayList<Barco> arrayBarco1 = Barco.pasarStringABarcos(mensajeArray[3]);
+                        		ArrayList<Barco> arrayBarco2 = Barco.pasarStringABarcos(mensajeArray[4]);
+                        		System.out.println(Barco.pasarArrayBarcosAString(arrayBarco1));
+                        		System.out.println(Barco.pasarArrayBarcosAString(arrayBarco2));
+                        		int id_jugador1 = Integer.valueOf(mensajeArray[7]);
+                        		int id_jugador2 = Integer.valueOf(mensajeArray[8]);
+                        		menuFrame.replayFrame.iniciarReplay(id_jugador1,id_jugador2,mensajeArray[5],arrayBarco1, mensajeArray[6], arrayBarco2, Integer.valueOf(mensajeArray[9]), mensajeArray[2],mensajeArray[10]);
+                        		break;
+                        	}
                         	
                         	break;
                         default:
-//                        	 System.out.println(mensaje);
+                        	 System.out.println(mensaje);
                         	 break;
                         }
                        
                     } while (!mensaje.equals("bye"));
 
                     socket.close();
-                    System.exit(0);  // Cerrar la aplicación cuando se desconecta
+                    System.exit(0);  
                 } catch (IOException | ClassNotFoundException e) {
                     // Manejar la excepción de conexión reset
                     if (e instanceof SocketException && e.getMessage().equals("Connection reset")) {

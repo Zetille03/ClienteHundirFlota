@@ -6,6 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="E:/DAM/2DAM/Programación_servicios/Tema_4/ProyectoInfoCompartida/infocompartida.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/InfoProyecto"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -26,8 +26,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import infocompartida.Barco;
-import infocompartida.Boton;
+import info.Barco;
+import info.Boton;
 
 public class ColocacionBarcosFrame extends JFrame{
 	
@@ -176,7 +176,7 @@ public class ColocacionBarcosFrame extends JFrame{
 						salida.writeObject("P@CO@"+nombreContrincante+"@"+id_partida);
 						salida.writeObject(arrayBarcos);
 						botonEnviar.setEnabled(false);
-						thisFrame.setEnabled(false);
+						thisFrame.setVisible(false);
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -866,7 +866,7 @@ public class ColocacionBarcosFrame extends JFrame{
 						boton[x].setActivo(true);
 						boton[x].setColorActivo();
 						boton[x].setIdBarco(contador_barco);
-						boton[x].setPosicionBarco(x);
+						boton[x].setPosicionTablero(x);
 						botonesBarco.add(boton[x]);
 //						boton[x].setText(""+contador_barco);
 					}

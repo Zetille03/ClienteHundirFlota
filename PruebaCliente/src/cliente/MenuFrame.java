@@ -15,11 +15,11 @@ import javax.swing.JFrame;
 public class MenuFrame extends JFrame {
 	JButton nuevaPartidaBoton = new JButton("Nueva partida");
     JButton verPartidasTerminadasBoton = new JButton("Ver partidas terminadas");
-    JButton verPartidasNoTerminadasBoton = new JButton("Ver partidas sin terminar");
     JButton salirBoton = new JButton("Salir");
     JButton volverAPartidaBoton = new JButton("Volver a la partida");
     FramePartida nuevaPartidaFrame;
     SeleccionContrincanteFrame seleccionarFrame;
+    ReplayFrame replayFrame;
     ArrayList<JFrame> arrayFrames = new ArrayList<JFrame>();
     MenuFrame menu = this;
      
@@ -29,7 +29,7 @@ public class MenuFrame extends JFrame {
 	   arrayFrames.add(this);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-       setLayout(new GridLayout(5,1));
+       setLayout(new GridLayout(4,1));
        setSize(new Dimension(200,400));
        
       
@@ -45,6 +45,19 @@ public class MenuFrame extends JFrame {
 		}
     	   
        });
+       
+       verPartidasTerminadasBoton.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				salida.writeObject("R@L");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	});
        
        
        salirBoton.addActionListener(new ActionListener() {
@@ -72,7 +85,6 @@ public class MenuFrame extends JFrame {
        add(nuevaPartidaBoton);
        add(volverAPartidaBoton);
        add(verPartidasTerminadasBoton);
-       add(verPartidasNoTerminadasBoton);
        add(salirBoton);
        
        setVisible(true);
